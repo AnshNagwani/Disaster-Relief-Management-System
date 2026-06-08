@@ -1,0 +1,277 @@
+# ============================================================
+# DISASTER RELIEF MANAGEMENT SYSTEM (DRMS)
+# ============================================================
+
+import mysql.connector
+
+
+# ---------------- DATABASE CONNECTION ---------------- #
+
+try:
+    con = mysql.connector.connect(
+        host="localhost",        # Change if required
+        user="root",             # Change if required
+        password="your_password",
+        database="DRMS"
+    )
+
+    cursor = con.cursor()
+    print("Database connection established successfully.\n")
+
+except Exception as e:
+    print("Database connection failed!")
+    print(e)
+    exit()
+
+
+# ---------------- UTILITY FUNCTIONS ---------------- #
+
+def print_line():
+    print("=" * 60)
+
+
+def print_heading(title):
+    print("\n")
+    print_line()
+    print(title.center(60))
+    print_line()
+
+
+def display_records(records):
+    if records:
+        for row in records:
+            print(row)
+    else:
+        print("No records found.")
+
+
+# ---------------- DONATION MODULE ---------------- #
+
+def donate():
+
+    print_heading("DONATION MODULE")
+
+    d_id = input("Enter Donor ID : ")
+    d_name = input("Enter Donor Name : ")
+    contact = input("Enter Contact Number : ")
+
+    try:
+        amount = int(input("Enter Donation Amount : "))
+    except ValueError:
+        print("Invalid amount!")
+        return
+
+    area = input("Enter Area : ")
+
+    query = """
+    INSERT INTO DONOR
+    (D_ID, D_NAME, CONTACT, HELP, AREA)
+    VALUES (%s,%s,%s,%s,%s)
+    """
+
+    values = (d_id, d_name, contact, amount, area)
+
+    try:
+        cursor.execute(query, values)
+        con.commit()
+        print("\nDonation recorded successfully.")
+    except Exception as e:
+        print("Error:", e)
+
+
+# ---------------- ASSISTANCE REQUEST MODULE ---------------- #
+
+def request_help():
+
+    print_heading("REQUEST ASSISTANCE")
+
+    v_id = input("Enter Victim ID : ")
+    name = input("Enter Name : ")
+
+    try:
+        age = int(input("Enter Age : "))
+    except ValueError:
+        print("Invalid age!")
+        return
+
+    area = input("Enter Area : ")
+    requirement = input("Enter Requirement : ")
+    center_id = input("Enter Relief Center ID : ")
+
+    status = "PENDING"
+
+    query = """
+    INSERT INTO VICTIMS
+    (V_ID, NAME, AGE, AREA, REQUIREMENT, C_ID, STATUS)
+    VALUES (%s,%s,%s,%s,%s,%s,%s)
+    """
+
+    values = (
+        v_id,
+        name,
+        age,
+        area,
+        requirement,
+        center_id,
+        status
+    )
+
+    try:
+        cursor.execute(query, values)
+        con.commit()
+        print("\nRequest registered successfully.")
+    except Exception as e:
+        print("Error:", e)
+
+
+# ---------------- VOLUNTEER MODULE ---------------- #
+
+def register_volunteer():
+
+    print_heading("VOLUNTEER REGISTRATION")
+
+    vol_id = input("Enter Volunteer ID : ")
+    name = input("Enter Name : ")
+    contact = input("Enter Contact Number : ")
+    area = input("Enter Area : ")
+    role = input("Enter Role : ")
+    center_id = input("Enter Relief Center ID : ")
+
+    query = """
+    INSERT INTO VOLUNTEERS
+    (VOL_ID, NAME, CONTACT, AREA, ROLE, C_ID)
+    VALUES (%s,%s,%s,%s,%s,%s)
+    """
+
+    values = (
+        vol_id,
+        name,
+        contact,
+        area,
+        role,
+        center_id
+    )
+
+    try:
+        cursor.execute(query, values)
+        con.commit()
+        print("\nVolunteer registered successfully.")
+    except Exception as e:
+        print("Error:", e)
+
+
+# ---------------- DISPLAY FUNCTIONS ---------------- #
+
+def view_volunteers():
+
+    print_heading("VOLUNTEER DIRECTORY")
+
+    try:
+        cursor.execute("SELECT * FROM VOLUNTEERS")
+        records = cursor.fetchall()
+        display_records(records)
+
+    except Exception as e:
+        print("Error:", e)
+
+
+def view_donors():
+
+    print_heading("DONOR DIRECTORY")
+
+    try:
+        cursor.execute("SELECT * FROM DONOR")
+        records = cursor.fetchall()
+        display_records(records)
+
+    except Exception as e:
+        print("Error:", e)
+
+
+def view_resources():
+
+    print_heading("RESOURCES INVENTORY")
+
+    try:
+        cursor.execute("SELECT * FROM RESOURCES")
+        records = cursor.fetchall()
+        display_records(records)
+
+    except Exception as e:
+        print("Error:", e)
+
+
+def view_relief_centers():
+
+    print_heading("RELIEF CENTER DIRECTORY")
+
+    try:
+        cursor.execute("SELECT * FROM R_CENTERS")
+        records = cursor.fetchall()
+        display_records(records)
+
+    except Exception as e:
+        print("Error:", e)
+
+
+# ---------------- MAIN MENU ---------------- #
+
+while True:
+
+    print("\n")
+    print_line()
+    print("DISASTER RELIEF MANAGEMENT SYSTEM".center(60))
+    print_line()
+
+    print("1. Make a Donation")
+    print("2. Request Assistance")
+    print("3. Register as Volunteer")
+    print("4. View Volunteer Directory")
+    print("5. View Donor Directory")
+    print("6. View Resources Inventory")
+    print("7. View Relief Center Directory")
+    print("8. Exit")
+
+    try:
+        choice = int(input("\nEnter Your Choice : "))
+    except ValueError:
+        print("Please enter a valid number.")
+        continue
+
+    if choice == 1:
+        donate()
+
+    elif choice == 2:
+        request_help()
+
+    elif choice == 3:
+        register_volunteer()
+
+    elif choice == 4:
+        view_volunteers()
+
+    elif choice == 5:
+        view_donors()
+
+    elif choice == 6:
+        view_resources()
+
+    elif choice == 7:
+        view_relief_centers()
+
+    elif choice == 8:
+        print("\nThank you for using DRMS.")
+        break
+
+    else:
+        print("Invalid choice. Please select between 1 and 8.")
+
+    input("\nPress Enter to continue...")
+
+
+# ---------------- CLOSE CONNECTION ---------------- #
+
+cursor.close()
+con.close()
+
+print("\nDatabase connection closed successfully.")
